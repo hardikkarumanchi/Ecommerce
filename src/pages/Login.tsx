@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../app/hooks'; // Our custom hooks
-import { loginUser } from '../features/auth/authSlice';     // Our Messenger
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { loginUser } from '../features/auth/authSlice';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -10,18 +10,25 @@ const Login = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    // Grab the loading and error status from the "Brain"
-    const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { isLoading, error } = useAppSelector((state) => state.auth);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // 1. Dispatch the login action
+        // 1. Dispatch the login action and wait for the result
         const resultAction = await dispatch(loginUser({ email, password }));
 
-        // 2. Check if it was successful
+        // 2. Check if the login was successful
         if (loginUser.fulfilled.match(resultAction)) {
-            navigate('/home'); // Redirect to Home
+            const userProfile = resultAction.payload; // This contains the user data from Profile table
+
+            if (userProfile.role === 'admin') {
+                console.log("Admin detected, routing to Dashboard...");
+                navigate('/admin');
+            } else {
+                console.log("Standard user detected, routing to Home...");
+                navigate('/home');
+            }
         }
     };
 
@@ -30,7 +37,6 @@ const Login = () => {
             <form onSubmit={handleSubmit}>
                 <h2>Login</h2>
 
-                {/* Show an error message if the login fails */}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
 
                 <input
@@ -49,15 +55,13 @@ const Login = () => {
                     required
                 />
 
-                {/* Change button text if it's currently loading */}
                 <button type="submit" disabled={isLoading}>
                     {isLoading ? 'Checking...' : 'Login'}
                 </button>
+                
                 <p style={{ marginTop: '1rem' }}>
-                    Don't have an account? 
-                <Link to="/signup">Sign up</Link>
+                    Don't have an account? <Link to="/signup">Sign up</Link>
                 </p>
-
             </form>
         </div>
     );
