@@ -11,7 +11,7 @@ const Login = () => {
     const navigate = useNavigate();
 
     // Grab the loading and error status from the "Brain"
-    const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { isLoading, error } = useAppSelector((state) => state.auth);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
