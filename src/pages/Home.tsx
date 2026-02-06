@@ -8,40 +8,54 @@ import { Link } from 'react-router-dom';
 const Home = () => {
     const dispatch = useAppDispatch();
 
-    // 1. Get Auth and Product state from Redux
-    const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-    const { items, isLoading, error } = useAppSelector((state) => state.products);
+    // 1. Grab Auth (with loading) and Product state
+    const { isAuthenticated, user, isLoading: authLoading } = useAppSelector((state) => state.auth);
+    const { items, isLoading: productsLoading, error } = useAppSelector((state) => state.products);
+    const cartItems = useAppSelector((state) => state.cart.items); // Specifically get cart items for the counter
 
-    // 2. Fetch data from Supabase on component mount
     useEffect(() => {
         dispatch(fetchProducts());
     }, [dispatch]);
 
+    // Helper to get the display name safely
+    const getDisplayName = () => {
+        if (authLoading) return '...';
+        // Check user_metadata first, then email, then fallback
+        return user?.full_name || user?.email || 'Guest';
+    };
+
     return (
         <div className="home-container">
             <header className="home-hero">
-                <h1>{isAuthenticated ? `Welcome back, ${user?.full_name}` : 'Welcome to Our Store'}</h1>
+                {/* Fixed the name display logic */}
+                <h1>
+                    {isAuthenticated ? `Welcome back, ${getDisplayName()}` : 'Welcome to Our Store'}
+                </h1>
                 <p>Quality products, delivered to you.</p>
             </header>
+
             <nav className="temp-navigation">
-                {user?.role === 'admin' && (
+                {/* Added user metadata check for role if needed */}
+                {(user?.role === 'admin') && (
                     <Link to="/admin" className="admin-link">Admin Dashboard</Link>
                 )} 
                 
+                <Link to="/orders" className="orders-link">My Orders</Link>
+
                 <Link to="/cart" className="cart-link">
-                    View Cart ({items.reduce((acc, item) => acc + item.quantity, 0)})
+                    {/* Fixed counter to use cartItems specifically */}
+                    View Cart ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})
                 </Link>
             </nav>
 
             <main className="content-area">
-                {isLoading && (
+                {(productsLoading || authLoading) && (
                     <div className="status-message">
                         <div className="spinner"></div>
-                        <p>Fetching the latest deals...</p>
+                        <p>Syncing with store...</p>
                     </div>
                 )}
 
-                {/* 2. Error State */}
                 {error && (
                     <div className="error-message">
                         <p>⚠️ Error: {error}</p>
@@ -49,25 +63,21 @@ const Home = () => {
                     </div>
                 )}
 
-                {/* 3. Empty State (No products in DB yet) */}
-                {!isLoading && items.length === 0 && !error && (
+                {!productsLoading && items.length === 0 && !error && (
                     <div className="empty-state">
                         <h3>No products found.</h3>
                         <p>Visit the Admin page to add your first item!</p>
                     </div>
                 )}
 
-                {/* 4. The Product Grid */}
                 <div className="product-grid">
                     {items.map((product: any) => (
                         <div key={product.id} className="product-card">
-                            {/* Fallback image if image_url is missing */}
                             <img
                                 src={product.image_url || 'https://via.placeholder.com/150'}
                                 alt={product.name}
                             />
                             <h3>{product.name}</h3>
-                            {/* Added Number() check to prevent toFixed errors if price comes as string */}
                             <p className="price">${Number(product.price).toFixed(2)}</p>
                             <button className="view-btn">View Details</button>
                             <button className="add-to-cart-btn"

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import supabase from '../../lib/supabase';
 import type { Profile } from '../../types/database';
 
@@ -12,7 +12,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
   error: null,
 };
 
@@ -76,6 +76,13 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       supabase.auth.signOut();
     },
+
+    // Inside authSlice.ts reducers
+    setUser: (state, action: PayloadAction<any>) => {
+      state.user = action.payload;
+      state.isAuthenticated = !!action.payload;
+      state.isLoading = false;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -107,5 +114,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setUser } = authSlice.actions;
 export default authSlice.reducer;
