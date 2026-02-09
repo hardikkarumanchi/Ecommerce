@@ -54,7 +54,7 @@ function App() {
     <Router>
       <Routes>
         {/* Redirect root to /home for a better UX */}
-        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/" element={<Navigate to="/home" replace/>} />
         
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
