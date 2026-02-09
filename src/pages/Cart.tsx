@@ -1,14 +1,15 @@
-import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { removeFromCart } from '../features/cart/cartSlice';
 import supabase from '../lib/supabase';
-//import './Cart.css';
+import { updateQuantity } from '../features/cart/cartSlice';
+import './cart.css';
+import Navbar from '../components/Navbar';
 
 const Cart = () => {
     const dispatch = useAppDispatch();
     const { items, totalAmount } = useAppSelector((state) => state.cart);
     const { user } = useAppSelector((state) => state.auth);
-    
+
 
     if (items.length === 0) {
         return (
@@ -18,46 +19,46 @@ const Cart = () => {
             </div>
         );
     }
-    const handleCheckout = async ()=>
-    {
+    const handleCheckout = async () => {
         if (!user) {
             alert("Please log in to checkout");
             return;
         }
-        try{
-            const {data: order, error: orderError} = await supabase
-            .from('orders')
-            .insert([{
-              user_id: user.id, 
-              total_amount: totalAmount
-            }])
-            .select()
-            .single(); 
-            if (orderError) throw orderError; 
+        try {
+            const { data: order, error: orderError } = await supabase
+                .from('orders')
+                .insert([{
+                    user_id: user.id,
+                    total_amount: totalAmount
+                }])
+                .select()
+                .single();
+            if (orderError) throw orderError;
 
             const orderEntries = items.map(item => ({
-                order_id: order.id, 
-                product_id: item.id, 
-                quantity: item.quantity, 
+                order_id: order.id,
+                product_id: item.id,
+                quantity: item.quantity,
                 price_at_purchase: item.price
-            })); 
+            }));
 
-            const {error: itemsError } = await supabase
-            .from('order_items')
-            .insert(orderEntries); 
+            const { error: itemsError } = await supabase
+                .from('order_items')
+                .insert(orderEntries);
 
-            if(itemsError) throw itemsError; 
+            if (itemsError) throw itemsError;
 
-            alert("order placed sucessfully"); 
+            alert("order placed sucessfully");
 
-        } catch(err: any){
-            alert("checkout failed: " + err.message); 
+        } catch (err: any) {
+            alert("checkout failed: " + err.message);
         }
-    }; 
+    };
     return (
-        
+
         <div className="cart-page">
- 
+            <Navbar />
+
             <h1>Your Shopping Cart</h1>
             <div className="cart-container">
                 <div className="cart-items">
@@ -68,7 +69,12 @@ const Cart = () => {
                                 <h3>{item.name}</h3>
                                 <p>Price: ${item.price}</p>
                                 <p>Quantity: {item.quantity}</p>
-                                <button 
+                                <div className="cart-item-controls">
+                                    <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1 }))}>-</button>
+                                    <span>{item.quantity}</span>
+                                    <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }))}>+</button>
+                                </div>
+                                <button
                                     onClick={() => dispatch(removeFromCart(item.id))}
                                     className="remove-btn"
                                 >
@@ -78,7 +84,6 @@ const Cart = () => {
                         </div>
                     ))}
                 </div>
-                <Link to="/orders">redirect to orders page</Link>
                 <div className="cart-summary">
                     <h3>Summary</h3>
                     <div className="summary-row">
@@ -90,7 +95,7 @@ const Cart = () => {
                         <span>${totalAmount.toFixed(2)}</span>
                     </div>
                     <button className="checkout-btn" onClick={handleCheckout}>Proceed to Checkout</button>
-                    
+
                 </div>
             </div>
         </div>

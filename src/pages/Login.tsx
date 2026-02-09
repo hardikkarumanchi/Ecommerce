@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { loginUser } from '../features/auth/authSlice';
+import './login.css'
 
 const Login = () => {
     const [email, setEmail] = useState('');

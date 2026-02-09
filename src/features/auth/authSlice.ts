@@ -5,14 +5,14 @@ import type { Profile } from '../../types/database';
 interface AuthState {
   user: Profile | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  isLoading: boolean; // We'll handle this carefully
   error: string | null;
 }
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: false, // Changed to false initially to prevent login screen flickering
   error: null,
 };
 
@@ -29,11 +29,18 @@ export const registerUser = createAsyncThunk(
       });
 
       if (authError) throw authError;
+      if (!authData.user) throw new Error("Signup failed - no user returned");
 
       // Step B: Create Database Profile
+      // We use .upsert() instead of .insert() to be safer against race conditions
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .insert([{ id: authData.user!.id, email, full_name: fullName, role: 'user' }])
+        .upsert([{ 
+          id: authData.user.id, 
+          email, 
+          full_name: fullName, 
+          role: 'user' 
+        }])
         .select()
         .single();
 
@@ -65,8 +72,6 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// --- THE SLICE (THE BRAIN) ---
-
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -76,8 +81,6 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       supabase.auth.signOut();
     },
-
-    // Inside authSlice.ts reducers
     setUser: (state, action: PayloadAction<any>) => {
       state.user = action.payload;
       state.isAuthenticated = !!action.payload;
@@ -86,9 +89,11 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Handle Login
-
-      .addCase(registerUser.pending, (state) => { state.isLoading = true; })
+      // Registration
+      .addCase(registerUser.pending, (state) => { 
+        state.isLoading = true; 
+        state.error = null; // Clear old errors
+      })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
@@ -98,6 +103,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+      // Login
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
