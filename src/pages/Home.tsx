@@ -3,9 +3,9 @@ import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { fetchProducts } from '../features/products/productSlice';
 import './Home.css';
 import { addToCart } from '../features/cart/cartSlice';
-import { Link, useNavigate } from 'react-router-dom';
-import supabase from '../lib/supabase';
-import { logout } from '../features/auth/authSlice';
+import { Link } from 'react-router-dom';
+//import supabase from '../lib/supabase';
+//import { logout } from '../features/auth/authSlice';
 import Navbar from '../components/Navbar';
 
 const ProductCard = ({ product, onAdd}: { product: any, onAdd: (p: any, q: number) => void, dispatch: any }) => {
@@ -42,7 +42,7 @@ const ProductCard = ({ product, onAdd}: { product: any, onAdd: (p: any, q: numbe
 
 const Home = () => {
     const dispatch = useAppDispatch();
-    const navigate = useNavigate();
+    //const navigate = useNavigate();
 
     // 1. Grab Auth (with loading) and Product state
     const { isAuthenticated, user, isLoading: authLoading } = useAppSelector((state) => state.auth);
@@ -60,11 +60,11 @@ const Home = () => {
         return user?.full_name || user?.email || 'Guest';
     };
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        dispatch(logout()); // Wipe Redux state
-        navigate('/login');
-    };
+    // const handleLogout = async () => {
+    //     await supabase.auth.signOut();
+    //     dispatch(logout()); // Wipe Redux state
+    //     navigate('/login');
+    // };
 
     return (
         <div className="home-container">
