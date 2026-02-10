@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { fetchProducts } from '../features/products/productSlice';
 import './Home.css';
 import { addToCart } from '../features/cart/cartSlice';
-import { Link } from 'react-router-dom';
+//import { Link } from 'react-router-dom';
 //import supabase from '../lib/supabase';
 //import { logout } from '../features/auth/authSlice';
 import Navbar from '../components/Navbar';
@@ -44,7 +44,7 @@ const Home = () => {
     const dispatch = useAppDispatch();
     const { isAuthenticated, user, isLoading: authLoading } = useAppSelector((state) => state.auth);
     const { items, isLoading: productsLoading, error } = useAppSelector((state) => state.products);
-    const cartItems = useAppSelector((state) => state.cart.items); // Specifically get cart items for the counter
+    //const cartItems = useAppSelector((state) => state.cart.items); // Specifically get cart items for the counter
 
     useEffect(() => {
         dispatch(fetchProducts());
