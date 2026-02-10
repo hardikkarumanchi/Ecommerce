@@ -1,32 +1,62 @@
 form {
-    border-radius: 5px;
-    background-color: lightgrey; 
-    padding: 20px; 
+    border-radius: 15px; 
+    background-color: #fffafa; 
+    padding: 30px; 
+    border: 1px solid #ffdada; 
+    box-shadow: 0 8px 24px rgba(240, 128, 128, 0.1); 
 }
 
-label {display: block}
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #cd5c5c; 
+    font-size: 0.9rem;
+}
 
-input[type=text], select {
+input[type=text], 
+input[type=number],
+input[type=email],
+input[type=password],
+select, 
+textarea {
     width: 100%; 
     padding: 12px; 
-    margin: 8px 0; 
+    margin: 8px 0 20px 0; 
     display: inline-block; 
-    border: 1px solid #ccc; 
-    border-radius: 4-x; 
+    border: 1.5px solid #ffdada; 
+    border-radius: 8px; 
     box-sizing: border-box; 
+    transition: all 0.3s ease;
+    background-color: #ffffff;
 }
 
-button[type=submit]{
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #F08080; 
+    box-shadow: 0 0 0 3px rgba(240, 128, 128, 0.2);
+}
+
+button[type=submit] {
   width: 100%;
-  background-color: #4CAF50;
+  background-color: #F08080; 
   color: white;
   padding: 14px;
-  margin: 8px 0;
+  margin: 10px 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 button[type=submit]:hover {
-  background-color: #45a049;
+  background-color: #e57373; 
+  transform: translateY(-1px);
+}
+
+button[type=submit]:active {
+  transform: translateY(0);
 }

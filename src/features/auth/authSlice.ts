@@ -5,24 +5,23 @@ import type { Profile } from '../../types/database';
 interface AuthState {
   user: Profile | null;
   isAuthenticated: boolean;
-  isLoading: boolean; // We'll handle this carefully
+  isLoading: boolean; 
   error: string | null;
 }
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isLoading: false, // Changed to false initially to prevent login screen flickering
+  isLoading: false, 
   error: null,
 };
 
-// --- THE MESSENGERS (THUNKS) ---
+
 
 export const registerUser = createAsyncThunk(
   'auth/register',
   async ({ email, password, fullName }: any, { rejectWithValue }) => {
     try {
-      // Step A: Create Auth User
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -31,8 +30,6 @@ export const registerUser = createAsyncThunk(
       if (authError) throw authError;
       if (!authData.user) throw new Error("Signup failed - no user returned");
 
-      // Step B: Create Database Profile
-      // We use .upsert() instead of .insert() to be safer against race conditions
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .upsert([{ 

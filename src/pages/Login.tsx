@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { loginUser } from '../features/auth/authSlice';
 import './login.css'
+import Navbar from '../components/Navbar';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -35,6 +36,7 @@ const Login = () => {
 
     return (
         <div className="login-container">
+            <Navbar />
             <form onSubmit={handleSubmit}>
                 <h2>Login</h2>
 

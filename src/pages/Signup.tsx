@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { registerUser } from '../features/auth/authSlice';
 import './login.css'; // Reusing the clean login styles
+import Navbar from '../components/Navbar';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -26,6 +27,7 @@ const Signup = () => {
 
   return (
     <div className="login-container">
+      <Navbar />
       <div className="login-card">
         <h2>Create Account</h2>
         <p>Join our store today</p>

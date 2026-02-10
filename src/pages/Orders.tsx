@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import supabase from '../lib/supabase';
 import { useAppSelector } from '../app/hooks';
 import './Orders.css';
+import Navbar from '../components/Navbar';
 
 const Orders = () => {
     const { user } = useAppSelector((state) => state.auth);
@@ -40,6 +41,7 @@ const Orders = () => {
 
     return (
         <div className="orders-container">
+            <Navbar />
             <h1>Your Order History</h1>
             {orders.length === 0 ? (
                 <p>You haven't placed any orders yet.</p>

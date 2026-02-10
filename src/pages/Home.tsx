@@ -42,9 +42,6 @@ const ProductCard = ({ product, onAdd}: { product: any, onAdd: (p: any, q: numbe
 
 const Home = () => {
     const dispatch = useAppDispatch();
-    //const navigate = useNavigate();
-
-    // 1. Grab Auth (with loading) and Product state
     const { isAuthenticated, user, isLoading: authLoading } = useAppSelector((state) => state.auth);
     const { items, isLoading: productsLoading, error } = useAppSelector((state) => state.products);
     const cartItems = useAppSelector((state) => state.cart.items); // Specifically get cart items for the counter
@@ -53,18 +50,11 @@ const Home = () => {
         dispatch(fetchProducts());
     }, [dispatch]);
 
-    // Helper to get the display name safely
     const getDisplayName = () => {
         if (authLoading) return '...';
         // Check user_metadata first, then email, then fallback
         return user?.full_name || user?.email || 'Guest';
     };
-
-    // const handleLogout = async () => {
-    //     await supabase.auth.signOut();
-    //     dispatch(logout()); // Wipe Redux state
-    //     navigate('/login');
-    // };
 
     return (
         <div className="home-container">
@@ -77,20 +67,6 @@ const Home = () => {
                 </h1>
                 <p>Quality products, delivered to you.</p>
             </header>
-
-            <nav className="temp-navigation">
-                {/* Added user metadata check for role if needed */}
-                {(user?.role === 'admin') && (
-                    <Link to="/admin" className="admin-link">Admin Dashboard</Link>
-                )}
-
-                <Link to="/orders" className="orders-link">My Orders</Link>
-
-                <Link to="/cart" className="cart-link">
-                    {/* Fixed counter to use cartItems specifically */}
-                    View Cart ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})
-                </Link>
-            </nav>
 
             <main className="content-area">
                 {(productsLoading || authLoading) && (

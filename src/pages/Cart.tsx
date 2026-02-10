@@ -1,30 +1,39 @@
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { removeFromCart } from '../features/cart/cartSlice';
+import { removeFromCart, updateQuantity, clearCart } from '../features/cart/cartSlice';
 import supabase from '../lib/supabase';
-import { updateQuantity } from '../features/cart/cartSlice';
 import './cart.css';
 import Navbar from '../components/Navbar';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Cart = () => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const { items, totalAmount } = useAppSelector((state) => state.cart);
     const { user } = useAppSelector((state) => state.auth);
 
-
     if (items.length === 0) {
         return (
-            <div className="cart-empty">
-                <h2>Your cart is lonely.</h2>
-                <p>Add some products to keep it company!</p>
+            <div className="cart-page">
+                <Navbar />
+                <div className="cart-empty">
+                    <h2>Your cart is lonely.</h2>
+                    <p>Add some products to keep it company!</p>
+                    <Link to="/home" className="checkout-btn" style={{ textDecoration: 'none', display: 'inline-block', width: 'auto', padding: '10px 30px' }}>
+                        Go Shopping
+                    </Link>
+                </div>
             </div>
         );
     }
+
     const handleCheckout = async () => {
         if (!user) {
             alert("Please log in to checkout");
             return;
         }
+
         try {
+      
             const { data: order, error: orderError } = await supabase
                 .from('orders')
                 .insert([{
@@ -33,6 +42,7 @@ const Cart = () => {
                 }])
                 .select()
                 .single();
+
             if (orderError) throw orderError;
 
             const orderEntries = items.map(item => ({
@@ -48,14 +58,32 @@ const Cart = () => {
 
             if (itemsError) throw itemsError;
 
-            alert("order placed sucessfully");
+            
+            for (const item of items) {
+                const { data: currentProduct } = await supabase
+                    .from('products')
+                    .select('stock')
+                    .eq('id', item.id)
+                    .single();
+
+                if (currentProduct) {
+                    await supabase
+                        .from('products')
+                        .update({ stock: currentProduct.stock - item.quantity })
+                        .eq('id', item.id);
+                }
+            }
+
+            alert("Order placed successfully! Stock has been updated.");
+            dispatch(clearCart()); 
+            navigate('/orders');   
 
         } catch (err: any) {
-            alert("checkout failed: " + err.message);
+            alert("Checkout failed: " + err.message);
         }
     };
-    return (
 
+    return (
         <div className="cart-page">
             <Navbar />
 
@@ -66,36 +94,41 @@ const Cart = () => {
                         <div key={item.id} className="cart-item">
                             <img src={item.image_url} alt={item.name} />
                             <div className="item-info">
-                                <h3>{item.name}</h3>
-                                <p>Price: ${item.price}</p>
-                                <p>Quantity: {item.quantity}</p>
-                                <div className="cart-item-controls">
-                                    <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1 }))}>-</button>
-                                    <span>{item.quantity}</span>
-                                    <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }))}>+</button>
+                                <div>
+                                    <h3>{item.name}</h3>
+                                    <p className="item-price-label">${item.price} each</p>
                                 </div>
-                                <button
-                                    onClick={() => dispatch(removeFromCart(item.id))}
-                                    className="remove-btn"
-                                >
-                                    Remove
-                                </button>
+                                
+                                <div className="cart-item-controls">
+                                    <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: Math.max(1, item.quantity - 1) }))}>−</button>
+                                    <span className="qty-display">{item.quantity}</span>
+                                    <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }))}>+</button>
+                                    <button
+                                        onClick={() => dispatch(removeFromCart(item.id))}
+                                        className="remove-btn"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
+
                 <div className="cart-summary">
                     <h3>Summary</h3>
                     <div className="summary-row">
-                        <span>Total Items:</span>
+                        <span>Total Items</span>
                         <span>{items.reduce((acc, item) => acc + item.quantity, 0)}</span>
                     </div>
                     <div className="summary-row total">
-                        <span>Total Price:</span>
+                        <span>Total Price</span>
                         <span>${totalAmount.toFixed(2)}</span>
                     </div>
-                    <button className="checkout-btn" onClick={handleCheckout}>Proceed to Checkout</button>
-
+                    <button className="checkout-btn" onClick={handleCheckout}>
+                        Proceed to Checkout
+                    </button>
+                    <Link to="/orders" className="orders-link">View Order History</Link>
                 </div>
             </div>
         </div>
