@@ -9,7 +9,7 @@ interface Product {
   price: number;
   description: string;
   image_url: string;
-  stock: number; 
+  stock: number;
 }
 
 interface ProductState {
@@ -29,9 +29,9 @@ export const fetchProducts = createAsyncThunk(
   'products/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const { data, error } = await supabase.from('products').select('*'); 
+      const { data, error } = await supabase.from('products').select('*');
       if (error) throw error;
-      return data as Product[]; 
+      return data as Product[];
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
@@ -42,7 +42,11 @@ export const fetchProducts = createAsyncThunk(
 const productSlice = createSlice({
   name: 'products',
   initialState,
-  reducers: {}, // We can add "deleteProduct" or "filterProducts" here later
+  reducers: {
+    filterProductsLow(state) {
+      state.items.sort((a, b) => a.price - b.price);
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProducts.pending, (state) => {

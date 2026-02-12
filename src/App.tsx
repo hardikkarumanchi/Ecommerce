@@ -9,7 +9,7 @@ import AdminDashboard from './pages/AdminDashboard.tsx';
 import { useEffect } from 'react';
 import supabase from './lib/supabase.ts';
 import { useAppDispatch } from './app/hooks.ts';
-import { setUser } from './features/auth/authSlice';
+import { setUser } from './features/auth/authSlice.ts';
 
 function App() {
   const dispatch = useAppDispatch();
