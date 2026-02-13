@@ -10,6 +10,14 @@ import Navbar from '../components/Navbar';
 
 const ProductCard = ({ product, onAdd}: { product: any, onAdd: (p: any, q: number) => void, dispatch: any }) => {
     const [quantity, setQuantity] = useState(1);
+    const [showControls, setShowControls] = useState(false); // Controls visibility
+
+    const handleAddToCart = () => {
+        onAdd(product, quantity);
+        setShowControls(false); // Hide controls after adding
+        setQuantity(1); // Reset quantity
+    };
+
     return (
         <div className="product-card">
             <img src={product.image_url || 'https://via.placeholder.com/150'} alt={product.name} />
@@ -17,25 +25,37 @@ const ProductCard = ({ product, onAdd}: { product: any, onAdd: (p: any, q: numbe
             <p className="price">${Number(product.price).toFixed(2)}</p>
             <p className="stock-tag">In Stock: {product.stock}</p>
 
-            <div className="home-qty-selector">
-                <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
-                <span>{quantity}</span>
-                <button 
-                    onClick={() => setQuantity(q => q < product.stock ? q + 1 : q)}
-                    disabled={quantity >= product.stock}
-                >+</button>
-            </div>
-
-            <button
-                className="add-to-cart-btn"
-                disabled={product.stock <= 0}
-                onClick={() => {
-                    onAdd(product, quantity);
-                    setQuantity(1); // Reset to 1 after adding
-                }}
-            >
-                {product.stock > 0 ? "Add to Cart" : 'Out of Stock'}
-            </button>
+            {/* If NOT clicked, show the "Add to Cart" button */}
+            {!showControls ? (
+                <button
+                    className="add-to-cart-btn"
+                    disabled={product.stock <= 0}
+                    onClick={() => setShowControls(true)}
+                >
+                    {product.stock > 0 ? "Add to Cart" : 'Out of Stock'}
+                </button>
+            ) : (
+                /* Once clicked, reveal the Quantity Selector and Confirm button */
+                <div className="action-area">
+                    <div className="home-qty-selector">
+                        <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
+                        <span>{quantity}</span>
+                        <button 
+                            onClick={() => setQuantity(q => q < product.stock ? q + 1 : q)}
+                            disabled={quantity >= product.stock}
+                        >+</button>
+                    </div>
+                    
+                    <div className="control-actions">
+                        <button className="confirm-btn" onClick={handleAddToCart}>
+                            Confirm ({quantity})
+                        </button>
+                        <button className="cancel-x-btn" onClick={() => setShowControls(false)}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

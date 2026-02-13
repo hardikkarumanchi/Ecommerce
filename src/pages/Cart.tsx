@@ -28,12 +28,17 @@ const Cart = () => {
 
     const handleCheckout = async () => {
         if (!user) {
-            alert("Please log in to checkout");
-            return;
+            
+            const goToLogin = window.confirm("Please log in to checkout. Click OK to go to the Login page.");
+
+            if (goToLogin) {
+                navigate('/login'); 
+            }
+            return; 
         }
 
         try {
-      
+
             const { data: order, error: orderError } = await supabase
                 .from('orders')
                 .insert([{
@@ -58,7 +63,7 @@ const Cart = () => {
 
             if (itemsError) throw itemsError;
 
-            
+
             for (const item of items) {
                 const { data: currentProduct } = await supabase
                     .from('products')
@@ -75,8 +80,8 @@ const Cart = () => {
             }
 
             alert("Order placed successfully! Stock has been updated.");
-            dispatch(clearCart()); 
-            navigate('/orders');   
+            dispatch(clearCart());
+            navigate('/orders');
 
         } catch (err: any) {
             alert("Checkout failed: " + err.message);
@@ -98,11 +103,29 @@ const Cart = () => {
                                     <h3>{item.name}</h3>
                                     <p className="item-price-label">${item.price} each</p>
                                 </div>
-                                
+
                                 <div className="cart-item-controls">
-                                    <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: Math.max(1, item.quantity - 1) }))}>−</button>
+                                    {/* If quantity is 1, show Delete button. If more than 1, show Minus button */}
+                                    {item.quantity === 1 ? (
+                                        <button
+                                            onClick={() => dispatch(removeFromCart(item.id))}
+                                            className="qty-delete-btn"
+                                            title="Remove item"
+                                        >
+                                            🗑️
+                                        </button>
+                                    ) : (
+                                        <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1 }))}>
+                                            −
+                                        </button>
+                                    )}
+
                                     <span className="qty-display">{item.quantity}</span>
-                                    <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }))}>+</button>
+
+                                    <button onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }))}>
+                                        +
+                                    </button>
+
                                     <button
                                         onClick={() => dispatch(removeFromCart(item.id))}
                                         className="remove-btn"
@@ -117,14 +140,32 @@ const Cart = () => {
 
                 <div className="cart-summary">
                     <h3>Summary</h3>
+                    <div className="summary-item-list">
+                        {items.map((item) => (
+                            <div key={item.id} className="summary-item-row">
+                                <div className="summary-item-details">
+                                    <span className="summary-item-name">{item.name}</span>
+                                    <span className="summary-item-qty">x{item.quantity}</span>
+                                </div>
+                                <span className="summary-item-price">
+                                    ${(item.price * item.quantity).toFixed(2)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="summary-divider"></div>
+
                     <div className="summary-row">
                         <span>Total Items</span>
                         <span>{items.reduce((acc, item) => acc + item.quantity, 0)}</span>
                     </div>
+
                     <div className="summary-row total">
                         <span>Total Price</span>
                         <span>${totalAmount.toFixed(2)}</span>
                     </div>
+
                     <button className="checkout-btn" onClick={handleCheckout}>
                         Proceed to Checkout
                     </button>
