@@ -28,15 +28,15 @@ const Cart = () => {
 
     const handleCheckout = async () => {
         if (!user) {
-            
+
             const goToLogin = window.confirm("Please log in to checkout. Click OK to go to the Login page.");
 
             if (goToLogin) {
-                navigate('/login'); 
+                navigate('/login');
             }
-            return; 
+            return;
         }
-
+//new comment
         try {
 
             const { data: order, error: orderError } = await supabase
